@@ -10,7 +10,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from . import Cra24Error, TransitionError, __version__
@@ -65,6 +65,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     t = sub.add_parser("tick", help="deadlines and overdue milestones for every open incident")
     t.add_argument("--now", help="evaluate at this time instead of the current time (ISO 8601)")
+    t.add_argument("--warn-within", type=float, metavar="HOURS",
+                   help="also fail when an owed milestone is due within this many hours")
     t.add_argument("--format", choices=["text", "json"], default="text")
 
     d = sub.add_parser("draft", help="Markdown notification draft for an incident")
@@ -149,7 +151,10 @@ def cmd_advance(a) -> int:
 
 def cmd_tick(a) -> int:
     now = _now(a)
-    rows = [clocks.tick(i, now) for i in incidents.load(a.state) if i["status"] != "reported"]
+    if a.warn_within is not None and a.warn_within <= 0:
+        raise Cra24Error("--warn-within must be a positive number of hours")
+    window = timedelta(hours=a.warn_within) if a.warn_within else None
+    rows = [clocks.tick(i, now, window) for i in incidents.load(a.state) if i["status"] != "reported"]
     if a.format == "json":
         print(json.dumps(rows, indent=2))
     elif not rows:
@@ -159,10 +164,13 @@ def cmd_tick(a) -> int:
         for r in rows:
             print(f"{r['id']:<9} {r['cve']:<16} {r['status']:<9} {r['deadline_24h']:<21} "
                   f"{r['hours_remaining_24h']:>7}h  {r['deadline_72h']:<21} {r['deadline_14d']:<21} "
-                  f"{','.join(r['overdue']) or '-'}")
+                  f"{','.join(r['overdue']) or '-'}"
+                  + (f"  due within {a.warn_within:g}h: {','.join(r['due_soon'])}" if r["due_soon"] else ""))
     overdue = [r for r in rows if r["overdue"]]
-    _log(f"{len(rows)} open incident(s) at {clocks.fmt_ts(now)}, {len(overdue)} overdue")
-    return 1 if overdue else 0
+    soon = [r for r in rows if r["due_soon"]]
+    _log(f"{len(rows)} open incident(s) at {clocks.fmt_ts(now)}, {len(overdue)} overdue"
+         + (f", {len(soon)} due within {a.warn_within:g}h" if window else ""))
+    return 1 if overdue or soon else 0
 
 
 def cmd_draft(a) -> int:

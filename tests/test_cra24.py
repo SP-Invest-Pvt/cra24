@@ -237,3 +237,20 @@ def test_help_and_usage(capsys):
     assert "watch" in capsys.readouterr().out
     assert main(["open", "--cve", "CVE-2021-44228"]) == 2     # --component is required
     assert main(["open", "--cve", "CVE-1", "--component", "x", "--reachability", "maybe"]) == 2
+
+
+def test_warn_within_flags_deadlines_before_they_pass(tmp_path, capsys):
+    t = clocks.tick(new_incident(), T0 + timedelta(hours=20), timedelta(hours=6))
+    assert t["overdue"] == [] and t["due_soon"] == ["24h"]
+    assert clocks.tick(new_incident(), T0 + timedelta(hours=20))["due_soon"] == []   # no window, no warning
+    assert clocks.tick(new_incident("notified"), T0 + timedelta(hours=20), timedelta(hours=6))["due_soon"] == []
+
+    state = tmp_path / "s.json"
+    cli(capsys, state, "open", "--cve", "CVE-2021-44228", "--component", LOG4J, "--reachability", "reachable",
+        "--discovered-at", "2026-09-14T08:30:15Z")
+    code, out, err = cli(capsys, state, "tick", "--now", "2026-09-15T04:00:00Z", "--warn-within", "6")
+    assert code == 1 and "due within 6h: 24h" in out and "1 due within 6h" in err
+    code, _, _ = cli(capsys, state, "tick", "--now", "2026-09-14T09:00:00Z", "--warn-within", "6")
+    assert code == 0
+    code, _, err = cli(capsys, state, "tick", "--warn-within", "0")
+    assert code == 2 and "positive number" in err

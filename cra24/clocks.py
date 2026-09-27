@@ -29,10 +29,13 @@ def deadlines(discovered_at: datetime) -> dict[str, datetime]:
     return {k: discovered_at + d for k, d in DEADLINES.items()}
 
 
-def tick(incident: dict, now: datetime) -> dict:
-    """Deadlines, hours left on the 24h clock, and which owed milestones are overdue."""
+def tick(incident: dict, now: datetime, warn_within: timedelta | None = None) -> dict:
+    """Deadlines, hours left on the 24h clock, which owed milestones are overdue and, with
+    warn_within, which are due within that window."""
     d = deadlines(parse_ts(incident["discovered_at"]))
-    overdue = [k for k in DEADLINES if now > d[k] and incident["status"] in OWED[k]]
+    owed = [k for k in DEADLINES if incident["status"] in OWED[k]]
+    overdue = [k for k in owed if now > d[k]]
+    due_soon = [k for k in owed if warn_within is not None and now <= d[k] <= now + warn_within]
     return {
         "id": incident["id"],
         "cve": incident["cve"],
@@ -43,4 +46,5 @@ def tick(incident: dict, now: datetime) -> dict:
         "deadline_14d": fmt_ts(d["14d"]),
         "hours_remaining_24h": round((d["24h"] - now).total_seconds() / 3600, 2),
         "overdue": overdue,
+        "due_soon": due_soon,
     }

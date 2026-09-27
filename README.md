@@ -196,15 +196,15 @@ open    --cve CVE-YYYY-NNNN --component PURL [--reachability reachable|not-reach
 notify  --incident ID          # early warning sent
 update  --incident ID          # vulnerability notification sent
 report  --incident ID          # final report sent
-tick    [--now ISO8601] [--format text|json]
+tick    [--now ISO8601] [--warn-within HOURS] [--format text|json]
 draft   --incident ID [-o draft.md]
 ```
 
 The state file defaults to `$CRA24_STATE`, else `incidents.json`, and is written atomically. Timestamps must carry `Z` or an offset and are stored in UTC. `--reachability` may be omitted when `--verdicts` holds a verdict for that service, CVE and component; the service is the SBOM's `metadata.component.name`, or `--product`.
 
-Exit codes: `0` success; `1` a check failed (`watch` found KEV matches not ruled out as `not-reachable`, `tick` found an overdue milestone) or a status change was refused; `2` usage or input error (malformed SBOM, KEV or state file, missing file, unknown incident). Logs go to stderr; results go to stdout.
+Exit codes: `0` success; `1` a check failed (`watch` found KEV matches not ruled out as `not-reachable`, `tick` found an overdue milestone, or one due within `--warn-within` hours) or a status change was refused; `2` usage or input error (malformed SBOM, KEV or state file, missing file, unknown incident). Logs go to stderr; results go to stdout.
 
-In CI: run `watch` for each SBOM on every build and daily (KEV grows), and `tick` on a schedule so an overdue milestone fails a job that someone sees.
+In CI: run `watch` for each SBOM on every build and daily (KEV grows), and `tick --warn-within 6` hourly, so a milestone due in the next six hours fails a job that someone sees while there is still time to act.
 
 ## Handoff from reachproof
 
