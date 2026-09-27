@@ -2,11 +2,11 @@
 
 Clock management for Article 14 of the EU Cyber Resilience Act. It watches your SBOMs against the CISA Known Exploited Vulnerabilities catalog, starts the 24-hour clock when you become aware, tracks the 72-hour and 14-day follow-ups, and drafts the notification.
 
-[![ci](https://github.com/SP-Invest-Pvt/cra24/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![ci](https://github.com/sp-kernel-stack/cra24/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
 ## The problem
 
-From 11 September 2026, Article 14 of the Cyber Resilience Act (Regulation (EU) 2024/2847) requires a manufacturer that becomes aware of an actively exploited vulnerability in its product to notify the CSIRT designated as coordinator and ENISA:
+From 11 September 2026 (Article 71(2)), Article 14 of the Cyber Resilience Act (Regulation (EU) 2024/2847) requires a manufacturer that becomes aware of an actively exploited vulnerability in its product to notify the CSIRT designated as coordinator and ENISA:
 
 * an **early warning** without undue delay and in any event **within 24 hours** of becoming aware;
 * a **vulnerability notification within 72 hours**, with more detail;
@@ -19,7 +19,7 @@ Most teams have vulnerability scanners but no clock. Nothing records when they b
 1. **KEV watch.** `cra24 watch` reads a CycloneDX JSON SBOM and the CISA KEV CSV.
    * *Exact match:* the SBOM's own `vulnerabilities[]` names a CVE that is in KEV and says which component it affects.
    * *Heuristic match:* a component's name or group resembles a KEV entry's product, for example `log4j-core` and "Apache Log4j2", or `org.springframework` and "VMware Spring Framework". KEV lists **no affected version ranges**, so versions are not compared, and each match says so. Generic product names ("Core", "Server") and products named after their vendor match only by component name. A heuristic match is a candidate to confirm, never a verdict.
-2. **Reachability verdicts** come from the sibling project [reachproof](https://github.com/SP-Invest-Pvt/reachproof). cra24 reads its `assessment.json` and maps `affected` to `reachable`, `not_affected` to `not-reachable` and `under_investigation` to `unknown`. It uses the human decision (`final`) when there is one, and the engine's `decision` otherwise. Verdicts are keyed by service, CVE and component purl, because the same library can be reachable in one service and not in another. cra24 does **not** reimplement reachability analysis; without reachproof, every match stays `unknown` unless you pass `--reachability` yourself.
+2. **Reachability verdicts** come from the sibling project [reachproof](https://github.com/sp-kernel-stack/reachproof). cra24 reads its `assessment.json` and maps `affected` to `reachable`, `not_affected` to `not-reachable` and `under_investigation` to `unknown`. It uses the human decision (`final`) when there is one, and the engine's `decision` otherwise. Verdicts are keyed by service, CVE and component purl, because the same library can be reachable in one service and not in another. cra24 does **not** reimplement reachability analysis; without reachproof, every match stays `unknown` unless you pass `--reachability` yourself.
 3. **Incidents** live in a JSON state file: `{id, cve, component, discovered_at, reachability, status}`, plus KEV evidence, product details and a status history.
 4. **Clocks** run from `discovered_at`: 24h early warning, 72h update, 336h (14 days) final report. `tick` shows every deadline, the hours left on the 24h clock, and which owed milestones are overdue.
 5. **Status machine:** `open-24h` → `notified` (`notify`) → `updated` (`update`) → `reported` (`report`). Skipping or repeating a step is refused with exit code 1.
@@ -87,7 +87,7 @@ $ echo $?
 1
 ```
 
-Read this output honestly. One line is a confirmed finding: Log4Shell in `log4j-core`, which reachproof traced from a request header to a logging call. The rest are candidates, and they are a mix. Spring 5.3.31 is patched against Spring4Shell (fixed in 5.3.18), and Tomcat 9.0.83 is patched against CVE-2016-8735, CVE-2017-12615, CVE-2017-12617 and CVE-2020-1938. It is still inside the affected range of CVE-2025-24813 (fixed in 9.0.99), and CVE-2026-34486 has to be checked against Apache's advisory. KEV cannot tell these apart, and cra24 does not guess; it leaves them `unknown` for reachproof, an SCA tool or a person to close out. `log4j-api` is flagged because it belongs to the Log4j2 product, although the vulnerable code is in `log4j-core`.
+Read this output honestly. One line is a confirmed finding: Log4Shell in `log4j-core`, which reachproof traced from a request header to a logging call. The rest are candidates. Some are already fixed in the versions shipped: reachproof's assessment in `examples/reachproof-assessment.json` names 5.3.18 as the Spring4Shell fix, and this SBOM ships Spring 5.3.31. Others may not be; the Tomcat matches need checking against Apache's advisories for each CVE. KEV cannot tell these apart, and cra24 does not guess; it leaves them `unknown` for reachproof, an SCA tool or a person to close out. `log4j-api` is flagged because it belongs to the Log4j2 product, although the vulnerable code is in `log4j-core`.
 
 Starting the clock for the confirmed one, three hours after the team became aware:
 
@@ -178,7 +178,7 @@ Upgrade log4j-core to 2.17.1 or later; until then remove JndiLookup.class from t
 Python 3.11 or newer, standard library only.
 
 ```bash
-git clone https://github.com/SP-Invest-Pvt/cra24 && cd cra24
+git clone https://github.com/sp-kernel-stack/cra24 && cd cra24
 pip install -e ".[test]"
 pytest
 python -m cra24 --help
