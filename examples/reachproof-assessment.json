@@ -1,0 +1,822 @@
+{
+  "tool": "reachproof 0.1.0",
+  "scanned_at": "2026-09-24T11:15:52+00:00",
+  "product": {
+    "product": "Acme Shop Platform",
+    "version": "4.2.0",
+    "manufacturer": "Acme Retail Systems Ltd (fictional demo)",
+    "psirt_contact": "psirt@acme.example",
+    "eu_member_states": [
+      "DE",
+      "FR",
+      "NL",
+      "IE"
+    ],
+    "services": [
+      {
+        "name": "notify-worker",
+        "sbom": "services/notify-worker/bom.cdx.json",
+        "source": "services/notify-worker"
+      },
+      {
+        "name": "billing-batch",
+        "sbom": "services/billing-batch/bom.cdx.json",
+        "source": "services/billing-batch"
+      },
+      {
+        "name": "legacy-portal",
+        "sbom": "services/legacy-portal/bom.cdx.json",
+        "source": "services/legacy-portal"
+      },
+      {
+        "name": "orders-api",
+        "sbom": "services/orders-api/bom.cdx.json",
+        "source": "services/orders-api"
+      }
+    ]
+  },
+  "feeds": {
+    "kev": {
+      "catalogVersion": "2026.09.23",
+      "count": 1721,
+      "dateReleased": "2026-09-23T12:51:35.821Z"
+    },
+    "advisories_cached": 7,
+    "epss": false
+  },
+  "llm": null,
+  "funnel": {
+    "components": 24,
+    "vulnerable_pairs": 11,
+    "known_exploited": 8,
+    "REPORT_CANDIDATE": 2,
+    "ASSESS_NOW": 3,
+    "NOT_AFFECTED": 3,
+    "ROUTINE": 3
+  },
+  "assessments": [
+    {
+      "id": "notify-worker|CVE-2021-44228",
+      "service": "notify-worker",
+      "service_purl": "pkg:maven/com.acme/notify-worker@4.2.0",
+      "cve": "CVE-2021-44228",
+      "aliases": [
+        "GHSA-jfh8-c2jp-5v3q"
+      ],
+      "advisory_id": "GHSA-jfh8-c2jp-5v3q",
+      "title": "Remote code injection in Log4j",
+      "components": [
+        "org.apache.logging.log4j:log4j-core@2.14.1"
+      ],
+      "component_purls": [
+        "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+      ],
+      "fixed_versions": [
+        "2.15.0"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2021-12-10",
+        "knownRansomwareCampaignUse": "Known",
+        "shortDescription": "Apache Log4j2 contains a vulnerability where JNDI features do not protect against attacker-controlled JNDI-related endpoints, allowing for remote code execution.",
+        "requiredAction": "For all affected software assets for which updates exist, the only acceptable remediation actions are: 1) Apply updates; OR 2) remove affected assets from agency networks. Temporary mitigations using one of the measures provided at https://www.cisa.gov/uscert/ed-22-02-apache-log4j-recommended-mitigation-measures are only acceptable until updates are available.",
+        "vulnerabilityName": "Apache Log4j2 Remote Code Execution Vulnerability"
+      },
+      "signature": {
+        "title": "Log4Shell: JNDI lookup in logged data",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-jfh8-c2jp-5v3q and the Apache Log4j security page",
+        "fix": "Upgrade log4j-core to 2.17.1 or later (2.12.4 / 2.3.2 for Java 7 / 6)."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": {
+        "status": "affected",
+        "justification": "",
+        "by": "Demo Reviewer",
+        "at": "2026-09-24T11:15:52+00:00",
+        "note": "User-Agent header reaches log.info at WebhookController.java:27.",
+        "rationale": "User-Agent header reaches log.info at WebhookController.java:27.",
+        "aware_at": "2026-09-24T11:15:52+00:00"
+      },
+      "decision": {
+        "status": "affected",
+        "justification": "",
+        "confidence": "high",
+        "rationale": "All exploit conditions hold at src/main/java/com/acme/notify/WebhookController.java:27. Fix: Upgrade log4j-core to 2.17.1 or later (2.12.4 / 2.3.2 for Java 7 / 6).",
+        "evidence": [
+          {
+            "stage": "presence",
+            "check": "log4j_api_used",
+            "desc": "Service code logs through the Log4j 2 API",
+            "result": true,
+            "file": "src/main/java/com/acme/notify/WebhookController.java",
+            "line": 4,
+            "snippet": "import org.apache.logging.log4j.LogManager;",
+            "detail": "4 match(es) (+3 more)"
+          },
+          {
+            "stage": "trigger",
+            "check": "tainted_log_call",
+            "desc": "Untrusted request data reaches a logging call",
+            "result": true,
+            "file": "src/main/java/com/acme/notify/WebhookController.java",
+            "line": 27,
+            "snippet": "log.info(\"Carrier webhook received from {}\", caller);",
+            "detail": "tainted by variable 'caller'"
+          },
+          {
+            "stage": "mitigation",
+            "check": "no_lookups_flag",
+            "desc": "log4j2.formatMsgNoLookups=true / LOG4J_FORMAT_MSG_NO_LOOKUPS=true",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 7 service files; not sufficient on its own. Apache withdrew this flag as a complete mitigation after CVE-2021-45046; upgrade instead."
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "REPORT_CANDIDATE"
+    },
+    {
+      "id": "legacy-portal|CVE-2022-22965",
+      "service": "legacy-portal",
+      "service_purl": "pkg:maven/com.acme/legacy-portal@4.2.0",
+      "cve": "CVE-2022-22965",
+      "aliases": [
+        "GHSA-36p3-wjmg-h94x"
+      ],
+      "advisory_id": "GHSA-36p3-wjmg-h94x",
+      "title": "Remote Code Execution in Spring Framework",
+      "components": [
+        "org.springframework:spring-webmvc@5.3.17",
+        "org.springframework:spring-beans@5.3.17"
+      ],
+      "component_purls": [
+        "pkg:maven/org.springframework/spring-webmvc@5.3.17",
+        "pkg:maven/org.springframework/spring-beans@5.3.17"
+      ],
+      "fixed_versions": [
+        "5.3.18"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2022-04-04",
+        "knownRansomwareCampaignUse": "Unknown",
+        "shortDescription": "Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding.",
+        "requiredAction": "Apply updates per vendor instructions.",
+        "vulnerabilityName": "Spring Framework JDK 9+ Remote Code Execution Vulnerability"
+      },
+      "signature": {
+        "title": "Spring4Shell: RCE via data binding on JDK 9+",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-36p3-wjmg-h94x (exploit prerequisites listed by the Spring team)",
+        "fix": "Upgrade to Spring Framework 5.3.18 / 5.2.20 or later (Spring Boot 2.6.6 / 2.5.12)."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "decision": {
+        "status": "affected",
+        "justification": "",
+        "confidence": "high",
+        "rationale": "All exploit conditions hold at src/main/java/com/acme/portal/ProfileController.java:24. Fix: Upgrade to Spring Framework 5.3.18 / 5.2.20 or later (Spring Boot 2.6.6 / 2.5.12).",
+        "evidence": [
+          {
+            "stage": "presence",
+            "check": "spring_web_handlers",
+            "desc": "Service defines Spring MVC or WebFlux request handlers",
+            "result": true,
+            "file": "src/main/java/com/acme/portal/ProfileController.java",
+            "line": 5,
+            "snippet": "import org.springframework.web.bind.annotation.GetMapping;",
+            "detail": "4 match(es) (+3 more)"
+          },
+          {
+            "stage": "precondition",
+            "check": "jdk9_plus",
+            "desc": "Runs on JDK 9 or higher",
+            "result": true,
+            "file": "Dockerfile",
+            "line": 1,
+            "snippet": "java_major = 11",
+            "detail": ""
+          },
+          {
+            "stage": "precondition",
+            "check": "war_packaging",
+            "desc": "Packaged as a WAR",
+            "result": true,
+            "file": "pom.xml",
+            "line": 6,
+            "snippet": "packaging = war",
+            "detail": ""
+          },
+          {
+            "stage": "precondition",
+            "check": "tomcat",
+            "desc": "Apache Tomcat is the servlet container",
+            "result": true,
+            "file": "Dockerfile",
+            "line": 1,
+            "snippet": "servlet_container = tomcat (standalone)",
+            "detail": ""
+          },
+          {
+            "stage": "trigger",
+            "check": "pojo_binding",
+            "desc": "A handler binds request parameters onto a POJO",
+            "result": true,
+            "file": "src/main/java/com/acme/portal/ProfileController.java",
+            "line": 24,
+            "snippet": "public String update(@ModelAttribute ProfileForm form, Model model) {",
+            "detail": "1 match(es)"
+          },
+          {
+            "stage": "mitigation",
+            "check": "disallowed_fields",
+            "desc": "WebDataBinder.setDisallowedFields blocks class.* binding",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 6 service files; not sufficient on its own. The Spring team warns local @InitBinder methods can override a global block; upgrade instead."
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "REPORT_CANDIDATE"
+    },
+    {
+      "id": "billing-batch|CVE-2021-44228",
+      "service": "billing-batch",
+      "service_purl": "pkg:maven/com.acme/billing-batch@4.2.0",
+      "cve": "CVE-2021-44228",
+      "aliases": [
+        "GHSA-jfh8-c2jp-5v3q"
+      ],
+      "advisory_id": "GHSA-jfh8-c2jp-5v3q",
+      "title": "Remote code injection in Log4j",
+      "components": [
+        "org.apache.logging.log4j:log4j-core@2.14.1"
+      ],
+      "component_purls": [
+        "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+      ],
+      "fixed_versions": [
+        "2.15.0"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2021-12-10",
+        "knownRansomwareCampaignUse": "Known",
+        "shortDescription": "Apache Log4j2 contains a vulnerability where JNDI features do not protect against attacker-controlled JNDI-related endpoints, allowing for remote code execution.",
+        "requiredAction": "For all affected software assets for which updates exist, the only acceptable remediation actions are: 1) Apply updates; OR 2) remove affected assets from agency networks. Temporary mitigations using one of the measures provided at https://www.cisa.gov/uscert/ed-22-02-apache-log4j-recommended-mitigation-measures are only acceptable until updates are available.",
+        "vulnerabilityName": "Apache Log4j2 Remote Code Execution Vulnerability"
+      },
+      "signature": {
+        "title": "Log4Shell: JNDI lookup in logged data",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-jfh8-c2jp-5v3q and the Apache Log4j security page",
+        "fix": "Upgrade log4j-core to 2.17.1 or later (2.12.4 / 2.3.2 for Java 7 / 6)."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "decision": {
+        "status": "not_affected",
+        "justification": "vulnerable_code_cannot_be_controlled_by_adversary",
+        "confidence": "low",
+        "rationale": "No path from untrusted input to the vulnerable behaviour was found. This rests on a heuristic data-flow check, so it needs a reviewer's confirmation. If any logged value can come from outside the service (headers, message payloads, database rows written by users), treat the component as affected.",
+        "evidence": [
+          {
+            "stage": "presence",
+            "check": "log4j_api_used",
+            "desc": "Service code logs through the Log4j 2 API",
+            "result": true,
+            "file": "src/main/java/com/acme/billing/InvoiceRun.java",
+            "line": 5,
+            "snippet": "import org.apache.logging.log4j.LogManager;",
+            "detail": "3 match(es) (+2 more)"
+          },
+          {
+            "stage": "trigger",
+            "check": "tainted_log_call",
+            "desc": "Untrusted request data reaches a logging call",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no call site receives request-derived data (heuristic taint)"
+          },
+          {
+            "stage": "mitigation",
+            "check": "no_lookups_flag",
+            "desc": "log4j2.formatMsgNoLookups=true / LOG4J_FORMAT_MSG_NO_LOOKUPS=true",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 5 service files; not sufficient on its own. Apache withdrew this flag as a complete mitigation after CVE-2021-45046; upgrade instead."
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "ASSESS_NOW"
+    },
+    {
+      "id": "billing-batch|CVE-2021-45046",
+      "service": "billing-batch",
+      "service_purl": "pkg:maven/com.acme/billing-batch@4.2.0",
+      "cve": "CVE-2021-45046",
+      "aliases": [
+        "GHSA-7rjr-3q55-vv33"
+      ],
+      "advisory_id": "GHSA-7rjr-3q55-vv33",
+      "title": "Incomplete fix for Apache Log4j vulnerability",
+      "components": [
+        "org.apache.logging.log4j:log4j-core@2.14.1"
+      ],
+      "component_purls": [
+        "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+      ],
+      "fixed_versions": [
+        "2.16.0"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2023-05-01",
+        "knownRansomwareCampaignUse": "Known",
+        "shortDescription": "Apache Log4j2 contains a deserialization of untrusted data vulnerability due to the incomplete fix of CVE-2021-44228, where the Thread Context Lookup Pattern is vulnerable to remote code execution in certain non-default configurations.",
+        "requiredAction": "Apply updates per vendor instructions.",
+        "vulnerabilityName": "Apache Log4j2 Deserialization of Untrusted Data Vulnerability"
+      },
+      "signature": {
+        "title": "Log4j incomplete fix: lookups via Thread Context data",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-7rjr-3q55-vv33 and the Apache Log4j security page",
+        "fix": "Upgrade log4j-core to 2.17.1 or later."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "decision": {
+        "status": "not_affected",
+        "justification": "vulnerable_code_cannot_be_controlled_by_adversary",
+        "confidence": "low",
+        "rationale": "No path from untrusted input to the vulnerable behaviour was found. This rests on a heuristic data-flow check, so it needs a reviewer's confirmation. Exploitation also needs a non-default layout that references Thread Context data (for example ${ctx:...}); check log4j2.xml before closing.",
+        "evidence": [
+          {
+            "stage": "presence",
+            "check": "log4j_api_used",
+            "desc": "Service code logs through the Log4j 2 API",
+            "result": true,
+            "file": "src/main/java/com/acme/billing/InvoiceRun.java",
+            "line": 5,
+            "snippet": "import org.apache.logging.log4j.LogManager;",
+            "detail": "3 match(es) (+2 more)"
+          },
+          {
+            "stage": "trigger",
+            "check": "tainted_thread_context",
+            "desc": "Untrusted request data written to the Thread Context / MDC",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no call site receives request-derived data (heuristic taint)"
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "ASSESS_NOW"
+    },
+    {
+      "id": "notify-worker|CVE-2021-45046",
+      "service": "notify-worker",
+      "service_purl": "pkg:maven/com.acme/notify-worker@4.2.0",
+      "cve": "CVE-2021-45046",
+      "aliases": [
+        "GHSA-7rjr-3q55-vv33"
+      ],
+      "advisory_id": "GHSA-7rjr-3q55-vv33",
+      "title": "Incomplete fix for Apache Log4j vulnerability",
+      "components": [
+        "org.apache.logging.log4j:log4j-core@2.14.1"
+      ],
+      "component_purls": [
+        "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+      ],
+      "fixed_versions": [
+        "2.16.0"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2023-05-01",
+        "knownRansomwareCampaignUse": "Known",
+        "shortDescription": "Apache Log4j2 contains a deserialization of untrusted data vulnerability due to the incomplete fix of CVE-2021-44228, where the Thread Context Lookup Pattern is vulnerable to remote code execution in certain non-default configurations.",
+        "requiredAction": "Apply updates per vendor instructions.",
+        "vulnerabilityName": "Apache Log4j2 Deserialization of Untrusted Data Vulnerability"
+      },
+      "signature": {
+        "title": "Log4j incomplete fix: lookups via Thread Context data",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-7rjr-3q55-vv33 and the Apache Log4j security page",
+        "fix": "Upgrade log4j-core to 2.17.1 or later."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "decision": {
+        "status": "not_affected",
+        "justification": "vulnerable_code_cannot_be_controlled_by_adversary",
+        "confidence": "low",
+        "rationale": "No path from untrusted input to the vulnerable behaviour was found. This rests on a heuristic data-flow check, so it needs a reviewer's confirmation. Exploitation also needs a non-default layout that references Thread Context data (for example ${ctx:...}); check log4j2.xml before closing.",
+        "evidence": [
+          {
+            "stage": "presence",
+            "check": "log4j_api_used",
+            "desc": "Service code logs through the Log4j 2 API",
+            "result": true,
+            "file": "src/main/java/com/acme/notify/WebhookController.java",
+            "line": 4,
+            "snippet": "import org.apache.logging.log4j.LogManager;",
+            "detail": "4 match(es) (+3 more)"
+          },
+          {
+            "stage": "trigger",
+            "check": "tainted_thread_context",
+            "desc": "Untrusted request data written to the Thread Context / MDC",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no call site receives request-derived data (heuristic taint)"
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "ASSESS_NOW"
+    },
+    {
+      "id": "billing-batch|CVE-2023-46604",
+      "service": "billing-batch",
+      "service_purl": "pkg:maven/com.acme/billing-batch@4.2.0",
+      "cve": "CVE-2023-46604",
+      "aliases": [
+        "GHSA-crg9-44h2-xw35"
+      ],
+      "advisory_id": "GHSA-crg9-44h2-xw35",
+      "title": "Apache ActiveMQ is vulnerable to Remote Code Execution",
+      "components": [
+        "org.apache.activemq:activemq-client@5.15.15"
+      ],
+      "component_purls": [
+        "pkg:maven/org.apache.activemq/activemq-client@5.15.15"
+      ],
+      "fixed_versions": [
+        "5.15.16"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2023-11-02",
+        "knownRansomwareCampaignUse": "Known",
+        "shortDescription": "Apache ActiveMQ contains a deserialization of untrusted data vulnerability that may allow a remote attacker with network access to a broker to run shell commands by manipulating serialized class types in the OpenWire protocol to cause the broker to instantiate any class on the classpath.",
+        "requiredAction": "Apply mitigations per vendor instructions or discontinue use of the product if mitigations are unavailable.",
+        "vulnerabilityName": "Apache ActiveMQ Deserialization of Untrusted Data Vulnerability"
+      },
+      "signature": {
+        "title": "ActiveMQ OpenWire deserialization RCE",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-crg9-44h2-xw35 and the Apache ActiveMQ advisory",
+        "fix": "Upgrade ActiveMQ to 5.15.16 / 5.16.7 / 5.17.6 / 5.18.3 or later."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": {
+        "status": "not_affected",
+        "justification": "vulnerable_code_not_in_execute_path",
+        "by": "Demo Reviewer",
+        "at": "2026-09-24T11:15:52+00:00",
+        "note": "activemq-client is never imported; removal ticket raised.",
+        "rationale": "activemq-client is never imported; removal ticket raised."
+      },
+      "decision": {
+        "status": "not_affected",
+        "justification": "vulnerable_code_not_in_execute_path",
+        "confidence": "medium",
+        "rationale": "The component is shipped but the service's own code never uses it, so the vulnerable code is not on an execution path the service drives. An unused dependency is not reachable today but is one import away; remove it from the build.",
+        "evidence": [
+          {
+            "stage": "presence",
+            "check": "activemq_used",
+            "desc": "Service code uses the ActiveMQ client or broker API",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 3 service code"
+          },
+          {
+            "stage": "trigger",
+            "check": "openwire_connection",
+            "desc": "Service opens OpenWire connections",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 3 service code"
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "NOT_AFFECTED"
+    },
+    {
+      "id": "orders-api|CVE-2020-1938",
+      "service": "orders-api",
+      "service_purl": "pkg:maven/com.acme/orders-api@4.2.0",
+      "cve": "CVE-2020-1938",
+      "aliases": [
+        "GHSA-c9hw-wf7x-jp9j"
+      ],
+      "advisory_id": "GHSA-c9hw-wf7x-jp9j",
+      "title": "Improper Privilege Management in Tomcat",
+      "components": [
+        "org.apache.tomcat.embed:tomcat-embed-core@9.0.30"
+      ],
+      "component_purls": [
+        "pkg:maven/org.apache.tomcat.embed/tomcat-embed-core@9.0.30"
+      ],
+      "fixed_versions": [
+        "9.0.31"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2022-03-03",
+        "knownRansomwareCampaignUse": "Unknown",
+        "shortDescription": "Apache Tomcat treats Apache JServ Protocol (AJP) connections as having higher trust than, for example, a similar HTTP connection. If such connections are available to an attacker, they can be exploited.",
+        "requiredAction": "Apply updates per vendor instructions.",
+        "vulnerabilityName": "Apache Tomcat Improper Privilege Management Vulnerability"
+      },
+      "signature": {
+        "title": "Ghostcat: file read / inclusion via the AJP connector",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-c9hw-wf7x-jp9j and the Apache Tomcat security page",
+        "fix": "Upgrade Tomcat to 9.0.31 / 8.5.51 / 7.0.100 or later, or disable AJP."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "decision": {
+        "status": "not_affected",
+        "justification": "vulnerable_code_not_in_execute_path",
+        "confidence": "medium",
+        "rationale": "Exploit prerequisites not met: An AJP connector is configured is not true here (no match in 8 service files). Spring Boot's embedded Tomcat does not open an AJP connector unless code or configuration adds one.",
+        "evidence": [
+          {
+            "stage": "precondition",
+            "check": "ajp_enabled",
+            "desc": "An AJP connector is configured",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 8 service files"
+          },
+          {
+            "stage": "mitigation",
+            "check": "ajp_secret",
+            "desc": "AJP connector requires a secret",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 8 service files; sufficient"
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "NOT_AFFECTED"
+    },
+    {
+      "id": "orders-api|CVE-2022-22965",
+      "service": "orders-api",
+      "service_purl": "pkg:maven/com.acme/orders-api@4.2.0",
+      "cve": "CVE-2022-22965",
+      "aliases": [
+        "GHSA-36p3-wjmg-h94x"
+      ],
+      "advisory_id": "GHSA-36p3-wjmg-h94x",
+      "title": "Remote Code Execution in Spring Framework",
+      "components": [
+        "org.springframework.boot:spring-boot-starter-web@2.6.5",
+        "org.springframework:spring-webmvc@5.3.17",
+        "org.springframework:spring-beans@5.3.17"
+      ],
+      "component_purls": [
+        "pkg:maven/org.springframework.boot/spring-boot-starter-web@2.6.5",
+        "pkg:maven/org.springframework/spring-webmvc@5.3.17",
+        "pkg:maven/org.springframework/spring-beans@5.3.17"
+      ],
+      "fixed_versions": [
+        "2.6.6",
+        "5.3.18"
+      ],
+      "epss": null,
+      "kev": {
+        "dateAdded": "2022-04-04",
+        "knownRansomwareCampaignUse": "Unknown",
+        "shortDescription": "Spring MVC or Spring WebFlux application running on JDK 9+ may be vulnerable to remote code execution (RCE) via data binding.",
+        "requiredAction": "Apply updates per vendor instructions.",
+        "vulnerabilityName": "Spring Framework JDK 9+ Remote Code Execution Vulnerability"
+      },
+      "signature": {
+        "title": "Spring4Shell: RCE via data binding on JDK 9+",
+        "reviewed": true,
+        "provenance": "Curated from GHSA-36p3-wjmg-h94x (exploit prerequisites listed by the Spring team)",
+        "fix": "Upgrade to Spring Framework 5.3.18 / 5.2.20 or later (Spring Boot 2.6.6 / 2.5.12)."
+      },
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "decision": {
+        "status": "not_affected",
+        "justification": "vulnerable_code_not_in_execute_path",
+        "confidence": "medium",
+        "rationale": "Exploit prerequisites not met: Packaged as a WAR is not true here (packaging = jar). The Spring team states the known exploit needs a WAR on Tomcat but the underlying flaw is more general. A not_affected decision here covers the known exploit path only; schedule the upgrade regardless.",
+        "evidence": [
+          {
+            "stage": "presence",
+            "check": "spring_web_handlers",
+            "desc": "Service defines Spring MVC or WebFlux request handlers",
+            "result": true,
+            "file": "src/main/java/com/acme/orders/OrderController.java",
+            "line": 4,
+            "snippet": "import org.springframework.web.bind.annotation.GetMapping;",
+            "detail": "6 match(es) (+5 more)"
+          },
+          {
+            "stage": "precondition",
+            "check": "jdk9_plus",
+            "desc": "Runs on JDK 9 or higher",
+            "result": true,
+            "file": "Dockerfile",
+            "line": 1,
+            "snippet": "java_major = 17",
+            "detail": ""
+          },
+          {
+            "stage": "precondition",
+            "check": "war_packaging",
+            "desc": "Packaged as a WAR",
+            "result": false,
+            "file": "pom.xml",
+            "line": 1,
+            "snippet": "packaging = jar",
+            "detail": ""
+          },
+          {
+            "stage": "precondition",
+            "check": "tomcat",
+            "desc": "Apache Tomcat is the servlet container",
+            "result": true,
+            "file": "pom.xml",
+            "line": 16,
+            "snippet": "servlet_container = tomcat (embedded)",
+            "detail": ""
+          },
+          {
+            "stage": "trigger",
+            "check": "pojo_binding",
+            "desc": "A handler binds request parameters onto a POJO",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 4 service code"
+          },
+          {
+            "stage": "mitigation",
+            "check": "disallowed_fields",
+            "desc": "WebDataBinder.setDisallowedFields blocks class.* binding",
+            "result": false,
+            "file": "",
+            "line": 0,
+            "snippet": "",
+            "detail": "no match in 8 service files; not sufficient on its own. The Spring team warns local @InitBinder methods can override a global block; upgrade instead."
+          }
+        ],
+        "needs_human": true
+      },
+      "bucket": "NOT_AFFECTED"
+    },
+    {
+      "id": "billing-batch|CVE-2022-42889",
+      "service": "billing-batch",
+      "service_purl": "pkg:maven/com.acme/billing-batch@4.2.0",
+      "cve": "CVE-2022-42889",
+      "aliases": [
+        "GHSA-599f-7c49-w659"
+      ],
+      "advisory_id": "GHSA-599f-7c49-w659",
+      "title": "Arbitrary code execution in Apache Commons Text",
+      "components": [
+        "org.apache.commons:commons-text@1.9"
+      ],
+      "component_purls": [
+        "pkg:maven/org.apache.commons/commons-text@1.9"
+      ],
+      "fixed_versions": [
+        "1.10.0"
+      ],
+      "epss": null,
+      "kev": null,
+      "signature": null,
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "bucket": "ROUTINE",
+      "decision": {
+        "status": "out_of_scope",
+        "justification": "",
+        "confidence": "",
+        "rationale": "Not listed as known-exploited in the CISA KEV catalogue (2026.09.23). Handle through normal vulnerability management; re-scan picks up new KEV listings.",
+        "evidence": [],
+        "needs_human": false
+      }
+    },
+    {
+      "id": "notify-worker|CVE-2020-36518",
+      "service": "notify-worker",
+      "service_purl": "pkg:maven/com.acme/notify-worker@4.2.0",
+      "cve": "CVE-2020-36518",
+      "aliases": [
+        "GHSA-57j2-w4cx-62h2"
+      ],
+      "advisory_id": "GHSA-57j2-w4cx-62h2",
+      "title": "Deeply nested json in jackson-databind",
+      "components": [
+        "com.fasterxml.jackson.core:jackson-databind@2.13.0"
+      ],
+      "component_purls": [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.0"
+      ],
+      "fixed_versions": [
+        "2.13.2.1"
+      ],
+      "epss": null,
+      "kev": null,
+      "signature": null,
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "bucket": "ROUTINE",
+      "decision": {
+        "status": "out_of_scope",
+        "justification": "",
+        "confidence": "",
+        "rationale": "Not listed as known-exploited in the CISA KEV catalogue (2026.09.23). Handle through normal vulnerability management; re-scan picks up new KEV listings.",
+        "evidence": [],
+        "needs_human": false
+      }
+    },
+    {
+      "id": "orders-api|CVE-2020-36518",
+      "service": "orders-api",
+      "service_purl": "pkg:maven/com.acme/orders-api@4.2.0",
+      "cve": "CVE-2020-36518",
+      "aliases": [
+        "GHSA-57j2-w4cx-62h2"
+      ],
+      "advisory_id": "GHSA-57j2-w4cx-62h2",
+      "title": "Deeply nested json in jackson-databind",
+      "components": [
+        "com.fasterxml.jackson.core:jackson-databind@2.13.0"
+      ],
+      "component_purls": [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.0"
+      ],
+      "fixed_versions": [
+        "2.13.2.1"
+      ],
+      "epss": null,
+      "kev": null,
+      "signature": null,
+      "opinion": null,
+      "agreement": null,
+      "final": null,
+      "bucket": "ROUTINE",
+      "decision": {
+        "status": "out_of_scope",
+        "justification": "",
+        "confidence": "",
+        "rationale": "Not listed as known-exploited in the CISA KEV catalogue (2026.09.23). Handle through normal vulnerability management; re-scan picks up new KEV listings.",
+        "evidence": [],
+        "needs_human": false
+      }
+    }
+  ]
+}
