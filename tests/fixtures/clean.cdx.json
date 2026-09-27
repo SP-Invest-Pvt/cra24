@@ -1,0 +1,2 @@
+{"bomFormat": "CycloneDX", "specVersion": "1.6", "metadata": {"component": {"name": "tiny", "version": "1.0"}},
+ "components": [{"type": "library", "group": "org.yaml", "name": "snakeyaml", "version": "2.2", "purl": "pkg:maven/org.yaml/snakeyaml@2.2"}]}

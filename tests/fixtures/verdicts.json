@@ -1,0 +1,8 @@
+{"assessments": [
+  {"id": "shop-api|CVE-2021-44228", "service": "shop-api", "cve": "CVE-2021-44228",
+   "component_purls": ["pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"],
+   "decision": {"status": "affected", "rationale": "X-Api-Version header reaches logger.info at Api.java:18"}},
+  {"id": "batch|CVE-2021-44228", "service": "batch", "cve": "CVE-2021-44228",
+   "component_purls": ["pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"],
+   "decision": {"status": "not_affected", "rationale": "only constant strings are logged"}}
+]}
