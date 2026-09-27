@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cra24"
+version = "0.1.0"
+description = "CRA Article 14 clock management: KEV watch over CycloneDX SBOMs, 24h / 72h / 14-day deadlines and notification drafts"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-cov>=5"]
+
+[project.scripts]
+cra24 = "cra24.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cra24*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
